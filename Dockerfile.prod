@@ -1,0 +1,18 @@
+FROM node:12-stretch
+LABEL maintainer = 'Junior Miranda'
+
+ENV API=/home/api
+
+EXPOSE 8080
+
+WORKDIR $API
+
+COPY ./package.json package.json
+
+RUN yarn install
+
+COPY . .
+
+RUN yarn build
+
+CMD yarn start:prod

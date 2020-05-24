@@ -1,0 +1,7 @@
+{
+    "*.ts": [
+        "eslint 'src/**' --fix",
+        "yarn test:e2e",
+        "git add"
+    ]
+}
