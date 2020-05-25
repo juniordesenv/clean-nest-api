@@ -6,10 +6,12 @@ import { defaultBeforeAll } from './init';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
+  let user;
 
   beforeAll(async () => {
     const result = await defaultBeforeAll();
     app = result.app;
+    user = result.user;
   });
 
   it('Should return 201 if user is created and success message', () => request(app.getHttpServer())
@@ -71,4 +73,17 @@ describe('AuthController (e2e)', () => {
     })
     .expect(400)
     .expect({ statusCode: 400, message: 'Email já cadastrado' }));
+
+  it('Should return 200 if email is verified', () => request(app.getHttpServer())
+    .put(`/auth/signup/confirm/${user.confirmToken}`)
+    .expect(200)
+    .expect('Email confirmado com sucesso!'));
+
+  it('Should return 422 if invalid token', () => request(app.getHttpServer())
+    .put('/auth/signup/confirm/any')
+    .expect(422));
+
+  it('Should return 400 if not found token', () => request(app.getHttpServer())
+    .put('/auth/signup/confirm/a9431818-d536-4aaa-b499-cfed5769b221')
+    .expect(400));
 });

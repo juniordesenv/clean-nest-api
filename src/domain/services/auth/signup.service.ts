@@ -1,13 +1,13 @@
 import { AddUserRepository } from '~/data/interfaces/db/user/add-user-repository.interface';
 import { DbAddUser } from '~/data/usecases/user/db-add-user';
-import { AddUserDto } from '~/domain/dto/user/add-user.dto';
 import { Hasher } from '~/data/interfaces/cryptography/hasher.interface';
 import { SenderMail } from '~/data/interfaces/mailer/sender-mail.interface';
 import { Config } from '~/data/interfaces/config/config.interface';
+import { AddUserModel } from '~/domain/usecases/user/add-user.interface';
 
 export class SignupService {
   async add(
-    addUserDto: AddUserDto,
+    addUserData: AddUserModel,
     addUserRepository: AddUserRepository,
     hasher: Hasher,
     uuid: UuidV4,
@@ -15,15 +15,15 @@ export class SignupService {
     senderMail: SenderMail,
   ) {
     const dbAddUser = new DbAddUser(hasher, addUserRepository, uuid);
-    const user = await dbAddUser.add(addUserDto);
+    const user = await dbAddUser.add(addUserData);
     try {
       await senderMail.sendMail({
-        to: addUserDto.email,
+        to: addUserData.email,
         from: config.get<string>('EMAIL_SMTP_DEFAULT'),
         subject: 'Cadastro efetuado com sucesso ✔',
         template: 'welcome',
         context: {
-          name: addUserDto.name,
+          name: addUserData.name,
           confirmToken: user.confirmToken,
           frontEndUrl: config.get<string>('FRONT_END_URL'),
         },

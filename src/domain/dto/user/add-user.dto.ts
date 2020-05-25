@@ -22,7 +22,7 @@ export class AddUserDto implements AddUserModel {
   @IsEqualTo('password')
   passwordConfirmation: string;
 
-  verifiedEmail?: boolean;
+  verifiedEmail?: false;
 
   confirmToken?: string;
 }

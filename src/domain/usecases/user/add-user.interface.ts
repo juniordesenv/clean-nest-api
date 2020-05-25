@@ -7,6 +7,7 @@ export interface AddUserModel {
   password: string;
   passwordConfirmation: string;
   confirmToken?: string;
+  verifiedEmail?: false;
 }
 
 export interface AddUser {
