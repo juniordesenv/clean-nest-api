@@ -38,7 +38,7 @@ export const defaultBeforeAll = async () => {
     name: 'Test name',
     email: 'test@test.com',
     password: '123456',
-    confirmToken: 'any',
+    confirmToken: 'ea88bb91-de7b-48d3-a538-acf4e91f0e61',
     verifiedEmail: true,
   });
 

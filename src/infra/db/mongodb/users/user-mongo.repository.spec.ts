@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { UserMongoRepository } from '~/infra/db/mongodb/users/user-mongo.repository';
 import { AppModule } from '~/app.module';
+import { ConfirmEmailUserModel } from '~/domain/usecases/user/confirm-email.interface';
 
 describe('User Mongo Repository', () => {
   let userMongoRepository: UserMongoRepository;
@@ -35,5 +36,20 @@ describe('User Mongo Repository', () => {
     expect(user.password).toBe('123456');
     expect(user.confirmToken).toBe('1234');
     expect(user.verifiedEmail).toBe(false);
+  });
+
+
+  it('Should return true if verifiedEmail is updated on success', async () => {
+    const data: ConfirmEmailUserModel = { confirmToken: '1234' };
+    const confirmed = await userMongoRepository.confirmEmailByToken(data);
+
+    expect(confirmed).toBe(true);
+  });
+
+  it('Should return false if token not found', async () => {
+    const data: ConfirmEmailUserModel = { confirmToken: '123456' };
+    const confirmed = await userMongoRepository.confirmEmailByToken(data);
+
+    expect(confirmed).toBe(false);
   });
 });
