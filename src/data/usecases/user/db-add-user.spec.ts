@@ -37,6 +37,7 @@ const makeFakeUser = (): any => ({
 const makeFakeUserData = (): AddUserDto => ({
   name: 'valid_name',
   email: 'valid_email',
+  username: 'valid_username',
   password: 'valid_password',
   passwordConfirmation: 'valid_password',
 });
@@ -98,6 +99,7 @@ describe('DbAddUser Usecase', () => {
       confirmToken: 'any_value',
       verifiedEmail: false,
       name: 'valid_name',
+      username: 'valid_username',
       email: 'valid_email',
       password: 'hashed_password',
       passwordConfirmation: 'valid_password',

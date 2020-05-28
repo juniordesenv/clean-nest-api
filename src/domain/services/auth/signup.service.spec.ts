@@ -70,6 +70,7 @@ const makeFakeUserData = (): AddUserDto => ({
   email: 'valid_email',
   password: 'valid_password',
   passwordConfirmation: 'valid_password',
+  username: 'valid_name',
 });
 
 const makeAddUserRepository = (): AddUserRepository => {
@@ -156,6 +157,7 @@ describe('SignupService', () => {
         email: 'valid_email',
         password: 'valid_password',
         passwordConfirmation: 'valid_password',
+        username: 'valid_name',
       },
       addUserRepositoryStub,
       hasherStub,
@@ -222,6 +224,7 @@ describe('SignupService', () => {
         email: 'valid_email',
         password: 'valid_password',
         passwordConfirmation: 'valid_password',
+        username: 'valid_name',
       });
     });
 

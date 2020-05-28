@@ -7,6 +7,14 @@ export class User implements UserModel {
   @prop({ required: true })
   name!: string;
 
+
+  @prop({
+    required: true,
+    lowercase: true,
+    unique: true,
+  })
+  username!: string;
+
   @prop({
     required: true,
     lowercase: true,

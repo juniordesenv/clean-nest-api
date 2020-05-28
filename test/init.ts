@@ -37,6 +37,7 @@ export const defaultBeforeAll = async () => {
   const user = await usersCollection.create({
     name: 'Test name',
     email: 'test@test.com',
+    username: 'test',
     password: '123456',
     confirmToken: 'ea88bb91-de7b-48d3-a538-acf4e91f0e61',
     verifiedEmail: true,
