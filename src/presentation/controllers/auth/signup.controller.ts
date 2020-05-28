@@ -41,6 +41,7 @@ export class SignupController {
         uuidAdapter,
         configAdapter,
         mailerAdapter,
+        this.userMongoRepository,
       );
       return 'Cadastro efetuado com sucesso!';
     } catch (err) {

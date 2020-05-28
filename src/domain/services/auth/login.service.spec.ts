@@ -27,7 +27,7 @@ const makeFakeLoginUserData = (): LoginModel => ({
 const makeLoadUserByEmailOrUsernameRepository = (): LoadUserByEmailOrUsernameRepository => {
   class LoadUserByEmailOrUsernameRepositoryStub implements LoadUserByEmailOrUsernameRepository {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    loadByEmailOrUsername(emailOrUsername: string): Promise<any> {
+    loadByEmailOrUsername(emailOrUsername: string): Promise<UserModel> {
       return Promise.resolve(makeFakeUser());
     }
   }
@@ -102,7 +102,9 @@ describe('Login Service', () => {
       const loginSpy = jest.spyOn(loginService, 'login');
 
       jest.spyOn(DbLoginUser.prototype, 'login')
-        .mockImplementationOnce((): any => new Promise((resolve) => resolve(true)));
+        .mockImplementationOnce(() => new Promise((resolve) => resolve({
+          accessToken: 'any_token',
+        })));
 
       await loginService.login(
         makeFakeLoginUserData(),

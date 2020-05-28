@@ -1,6 +1,5 @@
-import { DocumentType } from '@typegoose/typegoose';
-import { User } from '~/infra/db/mongodb/models/user.model';
+import { UserModel } from '~/domain/models/user.interface';
 
 export interface LoadUserByEmailOrUsernameRepository {
-  loadByEmailOrUsername(emailOrUsername: string): Promise<DocumentType<User>>
+  loadByEmailOrUsername(emailOrUsername: string): Promise<UserModel>
 }

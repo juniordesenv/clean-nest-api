@@ -60,7 +60,7 @@ describe('ConfirmEmailService', () => {
       const addSpy = jest.spyOn(confirmEmailService, 'confirmEmailByToken');
 
       jest.spyOn(DbConfirmEmailUser.prototype, 'confirmEmailByToken')
-        .mockImplementationOnce((): any => new Promise((resolve) => resolve(true)));
+        .mockImplementationOnce(() => new Promise((resolve) => resolve(true)));
 
       await confirmEmailService.confirmEmailByToken(
         makeFakeConfirmEmailUserData(),

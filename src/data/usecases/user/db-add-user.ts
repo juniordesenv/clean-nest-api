@@ -1,8 +1,7 @@
-import { DocumentType } from '@typegoose/typegoose';
-import { User } from '~/infra/db/mongodb/models/user.model';
 import { AddUserRepository } from '~/data/interfaces/db/user/add-user-repository.interface';
 import { Hasher } from '~/data/interfaces/cryptography/hasher.interface';
 import { AddUser, AddUserModel } from '~/domain/usecases/user/add-user.interface';
+import { UserModel } from '~/domain/models/user.interface';
 
 export class DbAddUser implements AddUser {
   constructor(
@@ -11,7 +10,7 @@ export class DbAddUser implements AddUser {
     private readonly uuid: UuidV4,
   ) {}
 
-  async add(userData: AddUserModel): Promise<DocumentType<User>> {
+  async add(userData: AddUserModel): Promise<UserModel> {
     const hashedPassword = await this.hasher.hash(userData.password);
     const confirmToken = this.uuid.v4();
     const user = await this.addUserRepository.add({

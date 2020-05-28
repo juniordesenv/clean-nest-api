@@ -1,10 +1,9 @@
 // eslint-disable-next-line max-classes-per-file
-import { DocumentType } from '@typegoose/typegoose';
 import { Hasher } from '~/data/interfaces/cryptography/hasher.interface';
-import { User } from '~/infra/db/mongodb/models/user.model';
 import { AddUserDto } from '~/domain/dto/user/add-user.dto';
 import { AddUserRepository } from '~/data/interfaces/db/user/add-user-repository.interface';
 import { DbAddUser } from '~/data/usecases/user/db-add-user';
+import { UserModel } from '~/domain/models/user.interface';
 
 
 const makeHasher = (): Hasher => {
@@ -27,11 +26,14 @@ const makeUuidV4 = (): UuidV4 => {
   return new UuidV4Stub();
 };
 
-const makeFakeUser = (): any => ({
+const makeFakeUser = (): UserModel => ({
   _id: 'valid_id',
   name: 'valid_name',
+  username: 'any_name',
   email: 'valid_email',
   password: 'hashed_password',
+  confirmToken: 'any_token',
+  verifiedEmail: false,
 });
 
 const makeFakeUserData = (): AddUserDto => ({
@@ -45,7 +47,7 @@ const makeFakeUserData = (): AddUserDto => ({
 const makeAddUserRepository = (): AddUserRepository => {
   class AddUserRepositoryStub implements AddUserRepository {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async add(userData: AddUserDto): Promise<DocumentType<User>> {
+    async add(userData: AddUserDto): Promise<UserModel> {
       return new Promise((resolve) => resolve(makeFakeUser()));
     }
   }
