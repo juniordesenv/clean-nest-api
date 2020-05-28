@@ -1,17 +1,17 @@
 // eslint-disable-next-line max-classes-per-file
 import { Test } from '@nestjs/testing';
-import { DocumentType } from '@typegoose/typegoose';
 import { ISendMailOptions } from '@nestjs-modules/mailer';
 import { SentMessageInfo } from 'nodemailer';
 import { AppModule } from '~/app.module';
 import { AddUserDto } from '~/domain/dto/user/add-user.dto';
 import { SignupService } from '~/domain/services/auth/signup.service';
 import { AddUserRepository } from '~/data/interfaces/db/user/add-user-repository.interface';
-import { User } from '~/infra/db/mongodb/models/user.model';
 import { Hasher } from '~/data/interfaces/cryptography/hasher.interface';
 import { DbAddUser } from '~/data/usecases/user/db-add-user';
 import { Config } from '~/data/interfaces/config/config.interface';
 import { SenderMail } from '~/data/interfaces/mailer/sender-mail.interface';
+import { UserModel } from '~/domain/models/user.interface';
+import { DeleteUserByIdRepository } from '~/data/interfaces/db/user/delete-user-by-id-repository';
 
 jest.mock('../../../data/usecases/user/db-add-user');
 
@@ -57,12 +57,14 @@ const makeUuidV4 = (): UuidV4 => {
   return new UuidV4Stub();
 };
 
-const makeFakeUser = (): any => ({
+const makeFakeUser = (): UserModel => ({
   _id: 'valid_id',
   name: 'valid_name',
+  username: 'valid_username',
   email: 'valid_email',
   password: 'hashed_password',
   confirmToken: 'any_token',
+  verifiedEmail: false,
 });
 
 const makeFakeUserData = (): AddUserDto => ({
@@ -76,7 +78,7 @@ const makeFakeUserData = (): AddUserDto => ({
 const makeAddUserRepository = (): AddUserRepository => {
   class AddUserRepositoryStub implements AddUserRepository {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async add(userData: AddUserDto): Promise<DocumentType<User>> {
+    async add(userData: AddUserDto): Promise<UserModel> {
       return new Promise((resolve) => resolve(makeFakeUser()));
     }
   }
@@ -84,12 +86,23 @@ const makeAddUserRepository = (): AddUserRepository => {
 };
 
 
+const makeDeleteUserByIdRepository = (): DeleteUserByIdRepository => {
+  class DeleteUserByIdRepositoryStub implements DeleteUserByIdRepository {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async deleteById(id: string): Promise<void> {
+      return new Promise((resolve) => resolve());
+    }
+  }
+  return new DeleteUserByIdRepositoryStub();
+};
+
 interface SutTypes {
-  hasherStub: Hasher,
-  addUserRepositoryStub: AddUserRepository
-  configStub: Config,
-  senderMailStub: SenderMail
-  uuidV4Stub: UuidV4,
+  hasherStub: Hasher;
+  addUserRepositoryStub: AddUserRepository;
+  configStub: Config;
+  senderMailStub: SenderMail;
+  uuidV4Stub: UuidV4;
+  deleteUserByIdRepositoryStub: DeleteUserByIdRepository;
 }
 
 const makeSut = (): SutTypes => {
@@ -98,12 +111,14 @@ const makeSut = (): SutTypes => {
   const configStub = makeConfig();
   const senderMailStub = makeSenderMail();
   const uuidV4Stub = makeUuidV4();
+  const deleteUserByIdRepositoryStub = makeDeleteUserByIdRepository();
   return {
     hasherStub,
     addUserRepositoryStub,
     configStub,
     senderMailStub,
     uuidV4Stub,
+    deleteUserByIdRepositoryStub,
   };
 };
 
@@ -133,15 +148,12 @@ describe('SignupService', () => {
         configStub,
         senderMailStub,
         uuidV4Stub,
+        deleteUserByIdRepositoryStub,
       } = makeSut();
       const addSpy = jest.spyOn(signupService, 'add');
 
-      const mockedUser = {
-        confirmToken: 'any_token',
-      };
-
       jest.spyOn(DbAddUser.prototype, 'add')
-        .mockImplementationOnce((): any => new Promise((resolve) => resolve(mockedUser)));
+        .mockImplementationOnce(() => new Promise((resolve) => resolve(makeFakeUser())));
 
       await signupService.add(
         makeFakeUserData(),
@@ -150,6 +162,7 @@ describe('SignupService', () => {
         uuidV4Stub,
         configStub,
         senderMailStub,
+        deleteUserByIdRepositoryStub,
       );
 
       expect(addSpy).toHaveBeenCalledWith({
@@ -163,7 +176,8 @@ describe('SignupService', () => {
       hasherStub,
       uuidV4Stub,
       configStub,
-      senderMailStub);
+      senderMailStub,
+      deleteUserByIdRepositoryStub);
     });
 
     test('Should create instance of DbAddUser with correct values', async () => {
@@ -173,27 +187,28 @@ describe('SignupService', () => {
         uuidV4Stub,
         configStub,
         senderMailStub,
+        deleteUserByIdRepositoryStub,
       } = makeSut();
 
       jest.clearAllMocks();
 
-
-      const mockedUser = {
-        confirmToken: 'any_token',
-      };
-
       jest.spyOn(DbAddUser.prototype, 'add')
-        .mockImplementationOnce((): any => new Promise((resolve) => resolve(mockedUser)));
+        .mockImplementationOnce(() => new Promise((resolve) => resolve(makeFakeUser())));
 
       await signupService.add(makeFakeUserData(),
         addUserRepositoryStub,
         hasherStub,
         uuidV4Stub,
         configStub,
-        senderMailStub);
+        senderMailStub,
+        deleteUserByIdRepositoryStub);
 
       expect(DbAddUser).toHaveBeenCalledTimes(1);
-      expect(DbAddUser).toHaveBeenCalledWith(hasherStub, addUserRepositoryStub, uuidV4Stub);
+      expect(DbAddUser).toHaveBeenCalledWith(
+        hasherStub,
+        addUserRepositoryStub,
+        uuidV4Stub,
+      );
     });
 
     test('Should call DbAddUser add with correct values', async () => {
@@ -203,21 +218,19 @@ describe('SignupService', () => {
         uuidV4Stub,
         configStub,
         senderMailStub,
+        deleteUserByIdRepositoryStub,
       } = makeSut();
 
-      const mockedUser = {
-        confirmToken: 'any_token',
-      };
-
       const addSpy = jest.spyOn(DbAddUser.prototype, 'add')
-        .mockImplementationOnce((): any => new Promise((resolve) => resolve(mockedUser)));
+        .mockImplementationOnce(() => new Promise((resolve) => resolve(makeFakeUser())));
 
       await signupService.add(makeFakeUserData(),
         addUserRepositoryStub,
         hasherStub,
         uuidV4Stub,
         configStub,
-        senderMailStub);
+        senderMailStub,
+        deleteUserByIdRepositoryStub);
 
       expect(addSpy).toHaveBeenCalledWith({
         name: 'valid_name',
@@ -235,24 +248,22 @@ describe('SignupService', () => {
         uuidV4Stub,
         configStub,
         senderMailStub,
+        deleteUserByIdRepositoryStub,
       } = makeSut();
 
       const sendEmailSpy = jest.spyOn(senderMailStub, 'sendMail');
 
 
-      const mockedUser = {
-        confirmToken: 'any_token',
-      };
-
       jest.spyOn(DbAddUser.prototype, 'add')
-        .mockImplementationOnce((): any => new Promise((resolve) => resolve(mockedUser)));
+        .mockImplementationOnce(() => new Promise((resolve) => resolve(makeFakeUser())));
 
       await signupService.add(makeFakeUserData(),
         addUserRepositoryStub,
         hasherStub,
         uuidV4Stub,
         configStub,
-        senderMailStub);
+        senderMailStub,
+        deleteUserByIdRepositoryStub);
 
       expect(sendEmailSpy).toHaveBeenCalledTimes(1);
       expect(sendEmailSpy).toHaveBeenCalledWith({
@@ -268,23 +279,22 @@ describe('SignupService', () => {
       });
     });
 
-    test('Should call remove user if SendEmail fails', async () => {
+    test('Should call deleteById user if SendEmail fails', async () => {
       const {
         addUserRepositoryStub,
         hasherStub,
         uuidV4Stub,
         configStub,
         senderMailStub,
+        deleteUserByIdRepositoryStub,
       } = makeSut();
 
-      const mockedUser = {
-        remove: jest.fn(),
-      };
-
       jest.spyOn(DbAddUser.prototype, 'add')
-        .mockImplementationOnce((): any => new Promise((resolve) => resolve(mockedUser)));
+        .mockImplementationOnce(() => new Promise((resolve) => resolve(makeFakeUser())));
 
       jest.spyOn(senderMailStub, 'sendMail').mockResolvedValueOnce(new Promise((resolve, reject) => reject()));
+
+      const deleteSpy = jest.spyOn(deleteUserByIdRepositoryStub, 'deleteById');
 
       try {
         await signupService.add(makeFakeUserData(),
@@ -292,11 +302,12 @@ describe('SignupService', () => {
           hasherStub,
           uuidV4Stub,
           configStub,
-          senderMailStub);
+          senderMailStub,
+          deleteUserByIdRepositoryStub);
         // eslint-disable-next-line no-empty
       } catch (e) {}
 
-      expect(mockedUser.remove).toHaveBeenCalledTimes(1);
+      expect(deleteSpy).toHaveBeenCalledTimes(1);
     });
 
     test('Should throws error if AddUser fails', async () => {
@@ -306,6 +317,7 @@ describe('SignupService', () => {
         uuidV4Stub,
         configStub,
         senderMailStub,
+        deleteUserByIdRepositoryStub,
       } = makeSut();
 
 
@@ -317,7 +329,8 @@ describe('SignupService', () => {
         hasherStub,
         uuidV4Stub,
         configStub,
-        senderMailStub);
+        senderMailStub,
+        deleteUserByIdRepositoryStub);
 
       await expect(promise).rejects.toThrow();
     });
@@ -329,6 +342,7 @@ describe('SignupService', () => {
         uuidV4Stub,
         configStub,
         senderMailStub,
+        deleteUserByIdRepositoryStub,
       } = makeSut();
 
 
@@ -340,7 +354,8 @@ describe('SignupService', () => {
         hasherStub,
         uuidV4Stub,
         configStub,
-        senderMailStub);
+        senderMailStub,
+        deleteUserByIdRepositoryStub);
 
       await expect(promise).rejects.toThrow();
     });

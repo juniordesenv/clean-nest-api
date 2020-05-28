@@ -4,6 +4,8 @@ import { User } from '~/infra/db/mongodb/models/user.model';
 import { LoadUserByEmailOrUsernameRepository } from '~/data/interfaces/db/user/load-user-by-email-or-username-repository';
 import { DbLoginUser } from '~/data/usecases/user/db-login-user';
 import { Encrypter } from '~/data/interfaces/cryptography/encrypter.interface';
+import { LoginModel } from '~/domain/usecases/user/login.interface';
+import { UserModel } from '~/domain/models/user.interface';
 
 
 const makeHashComparer = (): HashComparer => {
@@ -27,12 +29,12 @@ const makeEncrypter = (): Encrypter => {
   return new EncrypterStub();
 };
 
-const makeFakeLogin = (): any => ({
+const makeFakeLogin = (): LoginModel => ({
   username: 'any_email@mail.com',
   password: 'any_password',
 });
 
-const makeFakeUserData = (): User => ({
+const makeFakeUserData = (): UserModel => ({
   _id: 'any_id',
   name: 'valid_name',
   email: 'valid_email',
@@ -45,7 +47,7 @@ const makeFakeUserData = (): User => ({
 const makeLoadUserByEmailOrUsernameRepository = (): LoadUserByEmailOrUsernameRepository => {
   class LoadUserByEmailOrUsernameRepositoryStub implements LoadUserByEmailOrUsernameRepository {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async loadByEmailOrUsername(emailOrUsername: string): Promise<any> {
+    async loadByEmailOrUsername(emailOrUsername: string): Promise<UserModel> {
       const user: User = makeFakeUserData();
       return new Promise((resolve) => resolve(user));
     }

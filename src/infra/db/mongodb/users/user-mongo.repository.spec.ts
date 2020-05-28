@@ -91,4 +91,22 @@ describe('User Mongo Repository', () => {
     const user = await userMongoRepository.loadByEmailOrUsername('any_email@mail.com');
     expect(user).toBeFalsy();
   });
+
+  test('Should delete a user on deleteById success', async () => {
+    const user = await usersCollection.create({
+      name: 'any_name',
+      email: 'any_email@mail.com',
+      username: 'any_username',
+      password: 'any_password',
+      confirmToken: '1234',
+      verifiedEmail: true,
+    });
+    const promise = userMongoRepository.deleteById(user.id);
+    await expect(promise).resolves.not.toThrow();
+  });
+
+  test('Should return throw if not exist user by id on deleteById', async () => {
+    const promise = userMongoRepository.deleteById('5ed03c027bf3418a84143688');
+    await expect(promise).rejects.toThrow();
+  });
 });

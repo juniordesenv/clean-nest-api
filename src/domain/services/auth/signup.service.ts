@@ -4,6 +4,7 @@ import { Hasher } from '~/data/interfaces/cryptography/hasher.interface';
 import { SenderMail } from '~/data/interfaces/mailer/sender-mail.interface';
 import { Config } from '~/data/interfaces/config/config.interface';
 import { AddUserModel } from '~/domain/usecases/user/add-user.interface';
+import { DeleteUserByIdRepository } from '~/data/interfaces/db/user/delete-user-by-id-repository';
 
 export class SignupService {
   async add(
@@ -13,6 +14,7 @@ export class SignupService {
     uuid: UuidV4,
     config: Config,
     senderMail: SenderMail,
+    deleteUserByIdRepository: DeleteUserByIdRepository,
   ) {
     const dbAddUser = new DbAddUser(hasher, addUserRepository, uuid);
     const user = await dbAddUser.add(addUserData);
@@ -29,7 +31,7 @@ export class SignupService {
         },
       });
     } catch (e) {
-      await user.remove();
+      await deleteUserByIdRepository.deleteById(user._id);
       throw e;
     }
   }

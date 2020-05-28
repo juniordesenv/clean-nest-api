@@ -1,7 +1,6 @@
-import { DocumentType } from '@typegoose/typegoose';
-import { User } from '~/infra/db/mongodb/models/user.model';
 import { AddUserDto } from '~/domain/dto/user/add-user.dto';
+import { UserModel } from '~/domain/models/user.interface';
 
 export interface AddUserRepository {
-  add(userData: AddUserDto): Promise<DocumentType<User>>
+  add(userData: AddUserDto): Promise<UserModel>
 }
