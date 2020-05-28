@@ -19,6 +19,7 @@ describe('AuthController (e2e)', () => {
     .send({
       name: 'Test name',
       email: 'jr.miranda@outlook.com',
+      username: 'testa',
       password: '123456',
       passwordConfirmation: '123456',
     })
@@ -29,6 +30,7 @@ describe('AuthController (e2e)', () => {
     .post('/auth/signup')
     .send({
       email: 'jr.miranda@outlook.com',
+      username: 'testa',
       password: '123456',
       passwordConfirmation: '123456',
     })
@@ -37,6 +39,7 @@ describe('AuthController (e2e)', () => {
   it('Should return 422 if not email in body', () => request(app.getHttpServer())
     .post('/auth/signup')
     .send({
+      username: 'testa',
       name: 'Test name',
       password: '123456',
       passwordConfirmation: '123456',
@@ -47,16 +50,27 @@ describe('AuthController (e2e)', () => {
   it('Should return 422 if not password in body', () => request(app.getHttpServer())
     .post('/auth/signup')
     .send({
+      username: 'testa',
       name: 'Test name',
       email: 'jr.miranda@outlook.com',
       passwordConfirmation: '123456',
     })
     .expect(422));
 
+  it('Should return 422 if not username in body', () => request(app.getHttpServer())
+    .post('/auth/signup')
+    .send({
+      name: 'Test name',
+      email: 'jr.miranda@outlook.com',
+      password: '123456',
+      passwordConfirmation: '123456',
+    })
+    .expect(422));
 
   it('Should return 422 if not passwordConfirmation in body', () => request(app.getHttpServer())
     .post('/auth/signup')
     .send({
+      username: 'testa',
       name: 'Test name',
       email: 'jr.miranda@outlook.com',
       password: '123456',
@@ -68,6 +82,7 @@ describe('AuthController (e2e)', () => {
     .send({
       name: 'Test name',
       email: 'jr.miranda@outlook.com',
+      username: 'testu',
       password: '123456',
       passwordConfirmation: '123456',
     })
@@ -86,4 +101,19 @@ describe('AuthController (e2e)', () => {
   it('Should return 400 if not found token', () => request(app.getHttpServer())
     .put('/auth/signup/confirm/a9431818-d536-4aaa-b499-cfed5769b221')
     .expect(400));
+
+  it('Should return 422 if not username in body', () => request(app.getHttpServer())
+    .post('/auth/login')
+    .send({
+      password: '123456',
+    })
+    .expect(422));
+
+
+  it('Should return 422 if not password in body', () => request(app.getHttpServer())
+    .post('/auth/login')
+    .send({
+      username: 'test',
+    })
+    .expect(422));
 });

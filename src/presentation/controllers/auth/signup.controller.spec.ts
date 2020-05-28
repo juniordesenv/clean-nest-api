@@ -11,6 +11,7 @@ const makeFakeAddUserDto = (): AddUserDto => ({
   email: 'any_email@mail.com',
   password: 'any_password',
   passwordConfirmation: 'any_password',
+  username: 'valid_username',
 });
 
 const mockMailerService = {
@@ -48,6 +49,7 @@ describe('SignupController', () => {
         email: 'any_email@mail.com',
         password: 'any_password',
         passwordConfirmation: 'any_password',
+        username: 'valid_username',
       });
     });
 
@@ -75,6 +77,7 @@ describe('SignupController', () => {
       const httpRespnse = await signupController.handle({
         ...makeFakeAddUserDto(),
         email: 'new_email@test.com.br',
+        username: 'any_username',
       });
       expect(httpRespnse).toEqual('Cadastro efetuado com sucesso!');
     });
@@ -82,7 +85,8 @@ describe('SignupController', () => {
     test('Should message of success if valid data is correct', async () => {
       const httpRespnse = await signupController.handle({
         ...makeFakeAddUserDto(),
-        email: 'new_email',
+        email: 'new_email@email.com.br',
+        username: 'other_usernamer',
       });
       expect(httpRespnse).toEqual('Cadastro efetuado com sucesso!');
     });
