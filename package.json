@@ -51,7 +51,7 @@
     "mongoose": "^5.9.10",
     "mongoose-paginate-v2": "^1.3.9",
     "nestjs-typegoose": "^7.1.14",
-    "nodemailer": "^6.4.6",
+    "nodemailer": "^6.4.16",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
